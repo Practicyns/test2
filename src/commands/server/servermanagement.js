@@ -11,7 +11,12 @@ module.exports = {
     .addStringOption(option => option.setName('action').setDescription('Action (restart/add)').setRequired(true)),
   async execute(interaction, db) {
     const serverId = interaction.options.getString('serverid');
-    const action = interaction.options.getString('action').toLowerCase();
+    const actionRaw = interaction.options.getString('action');
+    if (!actionRaw) {
+      const embed = createFancyEmbed('Error', 'Action is required! Use "restart" or "add".', [], '#FF0000');
+      return await interaction.reply({ embeds: [embed], ephemeral: true });
+    }
+    const action = actionRaw.toLowerCase();
     const config = JSON.parse(fs.readFileSync('./config.json'));
     const nitrado = new NitradoAPI(config.nitradoToken);
     try {
@@ -32,7 +37,8 @@ module.exports = {
       }
     } catch (err) {
       console.error(err);
-      await interaction.reply({ content: 'Invalid action! Use "restart" or "add".', ephemeral: true });
+      const embed = createFancyEmbed('Error', 'Invalid action! Use "restart" or "add".', [], '#FF0000');
+      await interaction.reply({ embeds: [embed], ephemeral: true });
     }
   },
 };
