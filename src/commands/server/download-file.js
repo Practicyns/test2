@@ -14,9 +14,14 @@ module.exports = {
     const filepath = interaction.options.getString('filepath');
     const config = JSON.parse(fs.readFileSync('./config.json'));
     const nitrado = new NitradoAPI(config.nitradoToken);
-    const content = await nitrado.downloadFile(serverId, filepath);
-    const embed = createFancyEmbed('File Downloaded', `Downloaded ${filepath} from ${serverId}`, 
-      [{ name: 'Content Preview', value: content.substring(0, 100) + '...' }]);
-    interaction.reply({ embeds: [embed] });
+    try {
+      const content = await nitrado.downloadFile(serverId, filepath);
+      const embed = createFancyEmbed('File Downloaded', `Downloaded ${filepath} from ${serverId}`,
+        [{ name: 'Content Preview', value: content.substring(0, 100) + '...' }]);
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Error downloading file!', ephemeral: true });
+    }
   },
 };

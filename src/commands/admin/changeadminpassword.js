@@ -14,9 +14,14 @@ module.exports = {
     const password = interaction.options.getString('password');
     const config = JSON.parse(fs.readFileSync('./config.json'));
     const nitrado = new NitradoAPI(config.nitradoToken);
-    await nitrado.uploadFile(serverId, 'arkse/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini', 
-      `[ServerSettings]\nServerAdminPassword=${password}`);
-    const embed = createFancyEmbed('Password Changed', `Admin password updated on server ${serverId}!`);
-    interaction.reply({ embeds: [embed] });
+    try {
+      await nitrado.uploadFile(serverId, 'arkse/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini',
+        `[ServerSettings]\nServerAdminPassword=${password}`);
+      const embed = createFancyEmbed('Password Changed', `Admin password updated on server ${serverId}!`);
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Error changing password!', ephemeral: true });
+    }
   },
 };

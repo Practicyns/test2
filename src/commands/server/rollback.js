@@ -14,9 +14,14 @@ module.exports = {
     const filepath = interaction.options.getString('filepath');
     const config = JSON.parse(fs.readFileSync('./config.json'));
     const nitrado = new NitradoAPI(config.nitradoToken);
-    const result = await nitrado.rollbackFile(serverId, filepath);
-    if (result.status !== 'success') return interaction.reply({ content: 'Failed to rollback!', ephemeral: true });
-    const embed = createFancyEmbed('Rollback Complete', `Rolled back ${filepath} on ${serverId}!`);
-    interaction.reply({ embeds: [embed] });
+    try {
+      const result = await nitrado.rollbackFile(serverId, filepath);
+      if (result.status !== 'success') throw new Error('Rollback failed');
+      const embed = createFancyEmbed('Rollback Complete', `Rolled back ${filepath} on ${serverId}!`);
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Failed to rollback!', ephemeral: true });
+    }
   },
 };

@@ -14,11 +14,19 @@ module.exports = {
     const serverId = interaction.options.getString('serverid');
     const config = JSON.parse(fs.readFileSync('./config.json'));
     const nitrado = new NitradoAPI(config.nitradoToken);
-    const players = await nitrado.getPlayerList(serverId);
-    const embed = createFancyEmbed('Online Players', `Players on ${serverId}`, 
-      players.map(p => ({ name: p, value: 'Online', inline: true })));
-    await channel.send({ embeds: [embed] });
-    const replyEmbed = createFancyEmbed('Player List Set', `Player list set in ${channel.name} for ${serverId}!`);
-    interaction.reply({ embeds: [replyEmbed] });
+    try {
+      const players = await nitrado.getPlayerList(serverId);
+      const embed = createFancyEmbed(
+        'Online Players',
+        `Players on ${serverId}`,
+        players.map(p => ({ name: p, value: 'Online', inline: true }))
+      );
+      await channel.send({ embeds: [embed] });
+      const replyEmbed = createFancyEmbed('Player List Set', `Player list set in ${channel.name} for ${serverId}!`);
+      await interaction.reply({ embeds: [replyEmbed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Error setting player list!', ephemeral: true });
+    }
   },
 };

@@ -1,7 +1,7 @@
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
-const sqlite3 = require('sqlite3').verbose();
+const { Client: PgClient } = require('pg');
 require('dotenv').config();
 const { setupBot } = require('./utils/setup');
 
@@ -24,19 +24,48 @@ for (const folder of commandFolders) {
   }
 }
 
-const db = new sqlite3.Database('./database.sqlite', (err) => {
-  if (err) console.error(err.message);
-  console.log('Connected to SQLite database.');
+const db = new PgClient({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 });
 
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS admins (gamertag TEXT PRIMARY KEY)`);
-  db.run(`CREATE TABLE IF NOT EXISTS linked_accounts (discord_id TEXT PRIMARY KEY, gamertag TEXT)`);
-  db.run(`CREATE TABLE IF NOT EXISTS config (key TEXT PRIMARY KEY, value TEXT)`);
-  db.run(`CREATE TABLE IF NOT EXISTS bans (gamertag TEXT PRIMARY KEY, duration INTEGER, timestamp INTEGER, server_id TEXT)`);
-  db.run(`CREATE TABLE IF NOT EXISTS tribe_logs (tribe_id TEXT, log TEXT, timestamp INTEGER)`);
-  db.run(`CREATE TABLE IF NOT EXISTS payments (discord_id TEXT, amount REAL, timestamp INTEGER)`);
+db.connect(err => {
+  if (err) {
+    console.error('Error connecting to Postgres:', err.message);
+  } else {
+    console.log('Connected to Postgres database.');
+  }
 });
+
+db.query(`
+  CREATE TABLE IF NOT EXISTS admins (
+    gamertag TEXT PRIMARY KEY
+  );
+  CREATE TABLE IF NOT EXISTS linked_accounts (
+    discord_id TEXT PRIMARY KEY,
+    gamertag TEXT
+  );
+  CREATE TABLE IF NOT EXISTS config (
+    key TEXT PRIMARY KEY,
+    value TEXT
+  );
+  CREATE TABLE IF NOT EXISTS bans (
+    gamertag TEXT PRIMARY KEY,
+    duration INTEGER,
+    timestamp INTEGER,
+    server_id TEXT
+  );
+  CREATE TABLE IF NOT EXISTS tribe_logs (
+    tribe_id TEXT,
+    log TEXT,
+    timestamp INTEGER
+  );
+  CREATE TABLE IF NOT EXISTS payments (
+    discord_id TEXT,
+    amount REAL,
+    timestamp INTEGER
+  );
+`).catch(err => console.error('Error creating tables:', err.message));
 
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}`);

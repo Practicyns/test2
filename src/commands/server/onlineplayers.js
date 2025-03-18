@@ -12,9 +12,17 @@ module.exports = {
     const serverId = interaction.options.getString('serverid');
     const config = JSON.parse(fs.readFileSync('./config.json'));
     const nitrado = new NitradoAPI(config.nitradoToken);
-    const players = await nitrado.getPlayerList(serverId);
-    const embed = createFancyEmbed('Online Players', `Players on ${serverId}`, 
-      players.map(p => ({ name: p, value: 'Online', inline: true })));
-    interaction.reply({ embeds: [embed] });
+    try {
+      const players = await nitrado.getPlayerList(serverId);
+      const embed = createFancyEmbed(
+        'Online Players',
+        `Players on ${serverId}`,
+        players.map(p => ({ name: p, value: 'Online', inline: true }))
+      );
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Error fetching players!', ephemeral: true });
+    }
   },
 };

@@ -9,6 +9,6 @@ module.exports = {
   async execute(interaction, db) {
     const review = interaction.options.getString('review');
     const embed = createFancyEmbed('Review Submitted', `Thank you for your review: "${review}"`);
-    interaction.reply({ embeds: [embed] });
+    await interaction.reply({ embeds: [embed] });
   },
 };

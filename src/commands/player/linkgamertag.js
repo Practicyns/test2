@@ -8,11 +8,16 @@ module.exports = {
     .addStringOption(option => option.setName('gamertag').setDescription('Your gamertag').setRequired(true)),
   async execute(interaction, db) {
     const gamertag = interaction.options.getString('gamertag');
-    db.run(`INSERT OR REPLACE INTO linked_accounts (discord_id, gamertag) VALUES (?, ?)`, 
-      [interaction.user.id, gamertag], (err) => {
-        if (err) return interaction.reply({ content: 'Error linking gamertag!', ephemeral: true });
-        const embed = createFancyEmbed('Gamertag Linked', `${gamertag} linked to your account!`);
-        interaction.reply({ embeds: [embed] });
-      });
+    try {
+      await db.query(
+        'INSERT INTO linked_accounts (discord_id, gamertag) VALUES ($1, $2) ON CONFLICT (discord_id) DO UPDATE SET gamertag = $2',
+        [interaction.user.id, gamertag]
+      );
+      const embed = createFancyEmbed('Gamertag Linked', `${gamertag} linked to your account!`);
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Error linking gamertag!', ephemeral: true });
+    }
   },
 };

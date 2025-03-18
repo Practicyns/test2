@@ -8,10 +8,13 @@ module.exports = {
     .addStringOption(option => option.setName('gamertag').setDescription('The gamertag to remove').setRequired(true)),
   async execute(interaction, db) {
     const gamertag = interaction.options.getString('gamertag');
-    db.run(`DELETE FROM admins WHERE gamertag = ?`, [gamertag], (err) => {
-      if (err) return interaction.reply({ content: 'Error removing admin!', ephemeral: true });
+    try {
+      await db.query('DELETE FROM admins WHERE gamertag = $1', [gamertag]);
       const embed = createFancyEmbed('Admin Removed', `${gamertag} removed from allowed admins!`);
-      interaction.reply({ embeds: [embed] });
-    });
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Error removing admin!', ephemeral: true });
+    }
   },
 };

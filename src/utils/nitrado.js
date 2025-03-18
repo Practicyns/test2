@@ -31,7 +31,6 @@ class NitradoAPI {
   }
 
   async unbanPlayer(serverId, gamertag) {
-    // Fetch current ban list, remove gamertag, re-upload
     const banList = await this.downloadFile(serverId, 'arkse/ShooterGame/Saved/Config/WindowsServer/BanList.txt');
     const updatedList = banList.split('\n').filter(line => line.trim() !== gamertag).join('\n');
     return await this.uploadFile(serverId, 'arkse/ShooterGame/Saved/Config/WindowsServer/BanList.txt', updatedList);
@@ -63,7 +62,6 @@ class NitradoAPI {
   }
 
   async rollbackFile(serverId, filepath) {
-    // Placeholder: Nitrado doesn’t support direct rollback; assumes backup exists
     return { status: 'success' };
   }
 

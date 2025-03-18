@@ -14,10 +14,15 @@ module.exports = {
     const serverId = interaction.options.getString('serverid');
     const config = JSON.parse(fs.readFileSync('./config.json'));
     const nitrado = new NitradoAPI(config.nitradoToken);
-    const result = await nitrado.unbanPlayer(serverId, gamertag);
-    if (result.status !== 'success') return interaction.reply({ content: 'Failed to unban player!', ephemeral: true });
-    db.run(`DELETE FROM bans WHERE gamertag = ? AND server_id = ?`, [gamertag, serverId]);
-    const embed = createFancyEmbed('Player Unbanned', `${gamertag} unbanned on ${serverId}!`);
-    interaction.reply({ embeds: [embed] });
+    try {
+      const result = await nitrado.unbanPlayer(serverId, gamertag);
+      if (result.status !== 'success') throw new Error('Unban failed');
+      await db.query('DELETE FROM bans WHERE gamertag = $1 AND server_id = $2', [gamertag, serverId]);
+      const embed = createFancyEmbed('Player Unbanned', `${gamertag} unbanned on ${serverId}!`);
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Failed to unban player!', ephemeral: true });
+    }
   },
 };

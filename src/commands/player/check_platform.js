@@ -14,10 +14,15 @@ module.exports = {
     const serverId = interaction.options.getString('serverid');
     const config = JSON.parse(fs.readFileSync('./config.json'));
     const nitrado = new NitradoAPI(config.nitradoToken);
-    const players = await nitrado.getPlayerList(serverId);
-    const player = players.find(p => p.toLowerCase() === gamertag.toLowerCase());
-    const platform = player ? 'Online (Platform TBD)' : 'Not Online';
-    const embed = createFancyEmbed('Platform Check', `Platform for ${gamertag}: ${platform}`);
-    interaction.reply({ embeds: [embed] });
+    try {
+      const players = await nitrado.getPlayerList(serverId);
+      const player = players.find(p => p.toLowerCase() === gamertag.toLowerCase());
+      const platform = player ? 'Online (Platform TBD)' : 'Not Online';
+      const embed = createFancyEmbed('Platform Check', `Platform for ${gamertag}: ${platform}`);
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Error checking platform!', ephemeral: true });
+    }
   },
 };

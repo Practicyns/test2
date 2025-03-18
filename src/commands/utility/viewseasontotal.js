@@ -4,11 +4,14 @@ const { createFancyEmbed } = require('../../utils/embeds');
 module.exports = {
   data: new SlashCommandBuilder().setName('viewseasontotal').setDescription('View your season total'),
   async execute(interaction, db) {
-    db.all(`SELECT amount FROM payments WHERE discord_id = ?`, [interaction.user.id], (err, rows) => {
-      if (err) return interaction.reply({ content: 'Error fetching total!', ephemeral: true });
-      const total = rows.reduce((sum, row) => sum + row.amount, 0);
+    try {
+      const { rows } = await db.query('SELECT SUM(amount) AS total FROM payments WHERE discord_id = $1', [interaction.user.id]);
+      const total = rows[0].total || 0;
       const embed = createFancyEmbed('Season Total', `Your total: $${total}`);
-      interaction.reply({ embeds: [embed] });
-    });
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Error fetching total!', ephemeral: true });
+    }
   },
 };

@@ -11,6 +11,6 @@ module.exports = {
     const type = interaction.options.getString('type');
     const newName = interaction.options.getString('newname');
     const embed = createFancyEmbed('Name Changed', `${type} logs renamed to ${newName}!`);
-    interaction.reply({ embeds: [embed] });
+    await interaction.reply({ embeds: [embed] });
   },
 };

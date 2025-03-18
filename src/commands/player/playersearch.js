@@ -14,9 +14,14 @@ module.exports = {
     const serverId = interaction.options.getString('serverid');
     const config = JSON.parse(fs.readFileSync('./config.json'));
     const nitrado = new NitradoAPI(config.nitradoToken);
-    const players = await nitrado.getPlayerList(serverId);
-    const player = players.find(p => p.toLowerCase().includes(query.toLowerCase()));
-    const embed = createFancyEmbed('Player Search', player ? `${player} found on ${serverId}` : `${query} not found`);
-    interaction.reply({ embeds: [embed] });
+    try {
+      const players = await nitrado.getPlayerList(serverId);
+      const player = players.find(p => p.toLowerCase().includes(query.toLowerCase()));
+      const embed = createFancyEmbed('Player Search', player ? `${player} found on ${serverId}` : `${query} not found`);
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Error searching player!', ephemeral: true });
+    }
   },
 };

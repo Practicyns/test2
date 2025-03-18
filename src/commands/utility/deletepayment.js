@@ -8,10 +8,14 @@ module.exports = {
     .addIntegerOption(option => option.setName('id').setDescription('Payment ID').setRequired(true)),
   async execute(interaction, db) {
     const id = interaction.options.getInteger('id');
-    db.run(`DELETE FROM payments WHERE rowid = ? AND discord_id = ?`, [id, interaction.user.id], (err) => {
-      if (err) return interaction.reply({ content: 'Error deleting payment!', ephemeral: true });
+    try {
+      // Note: Original used rowid, but we'll assume an implicit ID or adjust schema if needed
+      await db.query('DELETE FROM payments WHERE discord_id = $1 AND timestamp = (SELECT timestamp FROM payments WHERE discord_id = $1 LIMIT 1 OFFSET $2)', [interaction.user.id, id - 1]);
       const embed = createFancyEmbed('Payment Deleted', `Payment #${id} deleted!`);
-      interaction.reply({ embeds: [embed] });
-    });
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Error deleting payment!', ephemeral: true });
+    }
   },
 };

@@ -8,10 +8,13 @@ module.exports = {
     .addStringOption(option => option.setName('tribeid').setDescription('Tribe ID').setRequired(true)),
   async execute(interaction, db) {
     const tribeId = interaction.options.getString('tribeid');
-    db.run(`DELETE FROM tribe_logs WHERE tribe_id = ?`, [tribeId], (err) => {
-      if (err) return interaction.reply({ content: 'Error deleting logs!', ephemeral: true });
+    try {
+      await db.query('DELETE FROM tribe_logs WHERE tribe_id = $1', [tribeId]);
       const embed = createFancyEmbed('Tribe Logs Deleted', `Logs for tribe ${tribeId} deleted!`);
-      interaction.reply({ embeds: [embed] });
-    });
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Error deleting logs!', ephemeral: true });
+    }
   },
 };

@@ -10,8 +10,13 @@ module.exports = {
   async execute(interaction, db) {
     const channel = interaction.options.getChannel('channel');
     const category = interaction.options.getChannel('category');
-    await channel.setParent(category.id);
-    const embed = createFancyEmbed('Channel Moved', `${channel.name} moved to ${category.name}!`);
-    interaction.reply({ embeds: [embed] });
+    try {
+      await channel.setParent(category.id);
+      const embed = createFancyEmbed('Channel Moved', `${channel.name} moved to ${category.name}!`);
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Error moving channel!', ephemeral: true });
+    }
   },
 };

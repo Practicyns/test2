@@ -14,8 +14,13 @@ module.exports = {
     const serverId = interaction.options.getString('serverid');
     const config = JSON.parse(fs.readFileSync('./config.json'));
     const nitrado = new NitradoAPI(config.nitradoToken);
-    // Placeholder: Ban tribe members (requires tribe member list)
-    const embed = createFancyEmbed('Tribe Banned', `Tribe ${tribeId} banned on ${serverId}!`);
-    interaction.reply({ embeds: [embed] });
+    try {
+      // Placeholder: Ban tribe members (requires tribe member list)
+      const embed = createFancyEmbed('Tribe Banned', `Tribe ${tribeId} banned on ${serverId}!`);
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Error banning tribe!', ephemeral: true });
+    }
   },
 };

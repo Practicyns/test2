@@ -16,9 +16,14 @@ module.exports = {
     const content = interaction.options.getString('content');
     const config = JSON.parse(fs.readFileSync('./config.json'));
     const nitrado = new NitradoAPI(config.nitradoToken);
-    const result = await nitrado.uploadFile(serverId, filepath, content);
-    if (result.status !== 'success') return interaction.reply({ content: 'Failed to upload file!', ephemeral: true });
-    const embed = createFancyEmbed('File Uploaded', `Uploaded ${filepath} to ${serverId}!`);
-    interaction.reply({ embeds: [embed] });
+    try {
+      const result = await nitrado.uploadFile(serverId, filepath, content);
+      if (result.status !== 'success') throw new Error('Upload failed');
+      const embed = createFancyEmbed('File Uploaded', `Uploaded ${filepath} to ${serverId}!`);
+      await interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({ content: 'Failed to upload file!', ephemeral: true });
+    }
   },
 };
