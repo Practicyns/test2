@@ -1,5 +1,5 @@
 {
-    "name": "ark-management-bot",
+    "name": "ase-management-bot",
     "version": "1.0.0",
     "description": "ARK server management bot using Nitrado API",
     "main": "src/index.js",
@@ -11,6 +11,7 @@
       "sqlite3": "^5.1.7",
       "dotenv": "^16.4.5",
       "node-fetch": "^2.7.0",
-      "pg": "^8.11.3"
-    }
+      "pg": "^8.11.3",
+      "axios": "^1.68",
+      "node-cron": "^3.02"    }
   }

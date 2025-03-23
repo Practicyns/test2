@@ -1,17 +1,16 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { createFancyEmbed } = require('../../utils/embeds');
+const { createEmbed, createProgressBar } = require('../../utils/embedUtils');
 
 module.exports = {
   data: new SlashCommandBuilder().setName('profile').setDescription('View your linked gamertag profile'),
   async execute(interaction, db) {
-    try {
-      const { rows } = await db.query('SELECT gamertag FROM linked_accounts WHERE discord_id = $1', [interaction.user.id]);
-      if (!rows.length) throw new Error('No linked gamertag');
-      const embed = createFancyEmbed('Profile', `${rows[0].gamertag}`, [{ name: 'Status', value: 'Online time TBD' }]);
-      await interaction.reply({ embeds: [embed] });
-    } catch (err) {
-      console.error(err);
-      await interaction.reply({ content: 'Link your gamertag first!', ephemeral: true });
-    }
-  },
+    const { rows } = await db.query('SELECT gamertag, platform, playtime, kills FROM linked_accounts WHERE discord_id = $1', [interaction.user.id]);
+    if (!rows.length) return await interaction.reply(createEmbed('No Profile', 'Link your gamertag with /linkgamertag!', [], '#FF0000', [], true));
+    const { gamertag, platform, playtime, kills } = rows[0];
+    await interaction.reply(createEmbed('Profile', `${gamertag}'s stats:`, [
+      { name: 'Platform', value: platform, inline: true },
+      { name: 'Playtime', value: `${playtime} hours (${createProgressBar(playtime, 1000)})`, inline: true },
+      { name: 'Kills', value: kills.toString(), inline: true }
+    ]));
+  }
 };
